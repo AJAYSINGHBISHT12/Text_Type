@@ -141,7 +141,7 @@ def main():
     model.load_state_dict(checkpoint['model'])
     model.eval()
 
-    image_path = 'C:\\Users\\91781\\Desktop\\1.jpg'
+    image_path = 'C:\\Users\\91781\\Desktop\\PMC5055614_00001.jpg'
     print(image_path)
     assert os.path.exists(image_path)
 
