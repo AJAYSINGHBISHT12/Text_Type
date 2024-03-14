@@ -112,8 +112,8 @@ def main():
 
     cap = cv2.VideoCapture(0)  # Open webcam
 
-    prev_prediction = None  # Previous frame's predictions for temporal smoothing
-    smoothing_factor = 0.5   # Smoothing factor for temporal smoothing
+    prev_predictions = []  # Previous frame's predictions for temporal smoothing
+    smoothing_window_size = 5  # Number of frames to average predictions over
 
     while True:
         ret, frame = cap.read()  # Read frame from webcam
@@ -136,18 +136,36 @@ def main():
 
         image = torch.squeeze(image, 0).permute(1, 2, 0).mul(255).numpy().astype(np.uint8)
 
+        avg_confidence = 0
+        num_predictions = 0
+
         for pred in prediction:
             for idx, mask in enumerate(pred['masks']):
-                if pred['scores'][idx].item() < 0.7:
-                    continue
-
                 m = mask[0].mul(255).byte().cpu().numpy()
                 box = list(map(int, pred["boxes"][idx].tolist()))
                 label = CATEGORIES2LABELS[pred["labels"][idx].item()]
 
                 score = pred["scores"][idx].item()
+                avg_confidence += score
+                num_predictions += 1
 
-                image = overlay_ann(image, m, box, label, score)
+                # Draw only if score is above a certain threshold
+                if score > 0.5:
+                    image = overlay_ann(image, m, box, label, score)
+
+        # Calculate average confidence score
+        if num_predictions > 0:
+            avg_confidence /= num_predictions
+
+        # Update previous predictions for temporal smoothing
+        prev_predictions.append(avg_confidence)
+        if len(prev_predictions) > smoothing_window_size:
+            prev_predictions.pop(0)
+
+        # Calculate dynamic confidence threshold
+        if len(prev_predictions) > 0:
+            avg_confidence = sum(prev_predictions) / len(prev_predictions)
+            confidence_threshold = max(0.5, avg_confidence)
 
         cv2.imshow('Frame', image)
 
