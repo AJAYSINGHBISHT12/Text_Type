@@ -149,7 +149,7 @@ def main():
                 avg_confidence += score
                 num_predictions += 1
 
-                # Draw only if score is above a certain threshold
+
                 if score > 0.5:
                     image = overlay_ann(image, m, box, label, score)
 
