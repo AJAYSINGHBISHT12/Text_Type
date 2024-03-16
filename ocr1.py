@@ -32,7 +32,7 @@ while True:
     # Display the frame with overlaid text
     cv2.imshow('Webcam', frame)
     
-    # Break the loop if 'q' is pressed
+     # Break the loop if 'q' is pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
