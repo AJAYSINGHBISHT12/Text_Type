@@ -5,7 +5,7 @@ from langdetect import detect  # Import language detection library
 # Set path to Tesseract executable (change it according to your system)
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-# Initialize webcam
+
 cap = cv2.VideoCapture(0)
 
 while True:
