@@ -89,7 +89,6 @@ def overlay_ann(image, mask, box, label, score, alpha=0.5):
 
     image = cv2.addWeighted(image, alpha, overlay, 1 - alpha, 0)
 
-    # draw on color mask
     cv2.rectangle(
         image,
         (box[0], box[1]),
