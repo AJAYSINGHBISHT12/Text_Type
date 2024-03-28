@@ -27,7 +27,7 @@ def scan_document(image):
   return scanned_image
 
 # Load the image.
-image = cv2.imread("C:\\Users\\91781\\Desktop\\Notice.jpg")
+image = cv2.imread("C:\\Users\\91781\\Desktop\\PMC5055614_00001.jpg")
 
 # Scan the document.
 scanned_image = scan_document(image)
