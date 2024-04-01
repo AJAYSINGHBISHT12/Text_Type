@@ -1,17 +1,18 @@
 import cv2
-import numpy as np
 from skimage import io
 
-def scan_document(image):
-    # Preprocess the image.
-    image = cv2.resize(image, (600, 600))
+def scan_document(image_path):
+    # Read the image
+    image = cv2.imread(image_path)
+
+    # Convert image to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Histogram equalization to enhance contrast.
-    equalized = cv2.equalizeHist(gray)
+    # Apply Gaussian blur to reduce noise
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
     # Thresholding
-    _, thresh = cv2.threshold(equalized, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
     # Find contours of the document.
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -25,34 +26,37 @@ def scan_document(image):
             max_area = area
             max_contour = contour
 
-    # Get the four corners of the document.
-    peri = cv2.arcLength(max_contour, True)
-    approx = cv2.approxPolyDP(max_contour, 0.02 * peri, True)
+    # Get the rotation angle of the document
+    rect = cv2.minAreaRect(max_contour)
+    angle = rect[-1]
 
-    # Order the points to be consistent with the perspective transformation.
-    rect_points = np.float32([point[0] for point in approx])
+    # Rotate the image to correct orientation
+    (h, w) = image.shape[:2]
+    center = (w // 2, h // 2)
+    M = cv2.getRotationMatrix2D(center, angle, 1.0)
+    rotated_image = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
 
-    # Ensure correct orientation of the document.
-    rect_points = rect_points[np.argsort(rect_points[:, 1])]  # Sort points based on y-coordinate
+    # Convert rotated image to grayscale
+    rotated_image_gray = cv2.cvtColor(rotated_image, cv2.COLOR_BGR2GRAY)
 
-    # Reorder the points to ensure top-left, top-right, bottom-right, bottom-left order.
-    if rect_points[0][0] > rect_points[1][0]:
-        rect_points[[0, 1]] = rect_points[[1, 0]]
-    if rect_points[2][0] < rect_points[3][0]:
-        rect_points[[2, 3]] = rect_points[[3, 2]]
+    # Enhance contrast
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    enhanced_image = clahe.apply(rotated_image_gray)
 
-    # Perspective transform the document.
-    dst = np.array([[0, 0], [600, 0], [600, 600], [0, 600]], dtype=np.float32)
-    M = cv2.getPerspectiveTransform(rect_points, dst)
-    warped = cv2.warpPerspective(image, M, (600, 600))
+    # Thresholding again within the document contour
+    _, thresh = cv2.threshold(enhanced_image, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    x, y, w, h = cv2.boundingRect(max_contour)
+    thresh = thresh[y:y+h, x:x+w]
 
-    # Return the scanned document.
-    return warped
+    # Find contours again after enhancement
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-image = io.imread("C:\\Users\\91781\\Desktop\\ocr.png")
-scanned_document = scan_document(image)
+    # Draw contours on the original image
+    output_image = image.copy()
+    cv2.drawContours(output_image, contours, -1, (0, 255, 0), 2)
 
-# Convert to uint8 for saving the image
-scanned_document = cv2.convertScaleAbs(scanned_document)
+    # Save the output image
+    io.imsave("C:\\Users\\91781\\Desktop\\output.jpg", output_image)
 
-io.imsave("C:\\Users\\91781\\Desktop\\output.png", scanned_document)
+# Call the function with the input image path
+scan_document("C:\\Users\\91781\\Desktop\\snapshot.jpg")
