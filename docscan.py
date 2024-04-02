@@ -1,62 +1,88 @@
 import cv2
+import numpy as np
 from skimage import io
 
-def scan_document(image_path):
-    # Read the image
-    image = cv2.imread(image_path)
-
-    # Convert image to grayscale
+def scan_document(image):
+    # Preprocess the image.
+    image = cv2.resize(image, (600, 600))
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Apply Gaussian blur to reduce noise
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-
-    # Thresholding
-    _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    # Adaptive Thresholding
+    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
 
     # Find contours of the document.
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Filter contours based on area to get the document contour.
+    # Filter contours based on area and shape to get the document contour.
     max_area = 0
     max_contour = None
     for contour in contours:
-        area = cv2.contourArea(contour)
-        if area > max_area:
-            max_area = area
-            max_contour = contour
+        peri = cv2.arcLength(contour, True)
+        approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
+        if len(approx) == 4:  # Check if contour is quadrilateral
+            area = cv2.contourArea(contour)
+            if area > max_area:
+                max_area = area
+                max_contour = contour
 
-    # Get the rotation angle of the document
-    rect = cv2.minAreaRect(max_contour)
-    angle = rect[-1]
+    # Check if a valid contour was found
+    if max_contour is None:
+        print("No document contour found.")
+        return None
 
-    # Rotate the image to correct orientation
-    (h, w) = image.shape[:2]
-    center = (w // 2, h // 2)
-    M = cv2.getRotationMatrix2D(center, angle, 1.0)
-    rotated_image = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+    # Get the four corners of the document.
+    peri = cv2.arcLength(max_contour, True)
+    approx = cv2.approxPolyDP(max_contour, 0.02 * peri, True)
 
-    # Convert rotated image to grayscale
-    rotated_image_gray = cv2.cvtColor(rotated_image, cv2.COLOR_BGR2GRAY)
+    # Order the points to ensure top-left, top-right, bottom-right, bottom-left order.
+    rect_points = np.float32([point[0] for point in approx])
+    rect_points = rect_points[np.argsort(rect_points[:, 1])]  # Sort points based on y-coordinate
 
-    # Enhance contrast
+    if rect_points[0][0] > rect_points[1][0]:
+        rect_points[[0, 1]] = rect_points[[1, 0]]
+    if rect_points[2][0] < rect_points[3][0]:
+        rect_points[[2, 3]] = rect_points[[3, 2]]
+
+    # Check if the number of points is 4
+    if len(rect_points) != 4:
+        print("Could not detect four corners of the document.")
+        return None
+
+    # Perspective transform the document.
+    dst = np.array([[0, 0], [600, 0], [600, 600], [0, 600]], dtype=np.float32)
+    M = cv2.getPerspectiveTransform(rect_points, dst)
+    warped = cv2.warpPerspective(image, M, (600, 600))
+
+    # Return the scanned document.
+    return warped
+
+def enhance_image(image_path):
+    # Read the image
+    image = cv2.imread(image_path)
+
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Apply CLAHE (Contrast Limited Adaptive Histogram Equalization) to enhance contrast
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    enhanced_image = clahe.apply(rotated_image_gray)
+    equalized = clahe.apply(gray)
 
-    # Thresholding again within the document contour
-    _, thresh = cv2.threshold(enhanced_image, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-    x, y, w, h = cv2.boundingRect(max_contour)
-    thresh = thresh[y:y+h, x:x+w]
+    # Display the original and enhanced images
+    cv2.imshow('Original Image', gray)
+    cv2.imshow('Enhanced Image', equalized)
+    io.imsave("output2.jpg", equalized)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
-    # Find contours again after enhancement
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+if __name__ == "__main__":
+    image = io.imread("test4.jpg")
+    scanned_document = scan_document(image)
+    
 
-    # Draw contours on the original image
-    output_image = image.copy()
-    cv2.drawContours(output_image, contours, -1, (0, 255, 0), 2)
-
-    # Save the output image
-    io.imsave("C:\\Users\\91781\\Desktop\\output.jpg", output_image)
-
-# Call the function with the input image path
-scan_document("C:\\Users\\91781\\Desktop\\snapshot.jpg")
+    if scanned_document is not None:
+        # Convert to uint8 for saving the image
+        scanned_document = cv2.convertScaleAbs(scanned_document)
+        io.imsave("output.jpg", scanned_document)
+        
+        image_path = "output.jpg"  # Change to the path of your image
+        enhance_image(image_path)
