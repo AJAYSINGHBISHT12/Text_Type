@@ -75,7 +75,7 @@ def enhance_image(image_path):
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    image = io.imread("test4.jpg")
+    image = io.imread("test6.jpg")
     scanned_document = scan_document(image)
     
 
