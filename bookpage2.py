@@ -31,7 +31,7 @@ def main(image_path):
     text = extract_text(processed_image, lang='mar')
     pages_text.append(text)
 
-    # Read the text of each page
+ 
     for text in pages_text:
         read_text(text)
 
