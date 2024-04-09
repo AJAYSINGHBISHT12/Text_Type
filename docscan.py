@@ -8,7 +8,7 @@ def scan_document(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Adaptive Thresholding
-    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
 
     # Find contours of the document.
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -75,7 +75,7 @@ def enhance_image(image_path):
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    image = io.imread("test6.jpg")
+    image = io.imread("test12.jpg")
     scanned_document = scan_document(image)
     
 

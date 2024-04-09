@@ -178,6 +178,7 @@ def scan_document(image):
     # Return the scanned document.
     return warped
 
+
 def enhance_image(image_path):
     # Read the image
     image = cv2.imread(image_path)
@@ -196,6 +197,7 @@ def enhance_image(image_path):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+
 def main():
     num_classes = 6
     model = get_instance_segmentation_model(num_classes)
@@ -213,7 +215,7 @@ def main():
     model.load_state_dict(checkpoint['model'])
     model.eval()
 
-    image_path = 'test6.jpg'
+    image_path = 'test12.jpg'
     print(image_path)
     assert os.path.exists(image_path)
 
@@ -222,7 +224,7 @@ def main():
 
     # Scan the document
     scanned_document = scan_document(original_image)
-    
+
     if scanned_document is not None:
         # Process the scanned document
         image = scanned_document
@@ -260,6 +262,9 @@ def main():
     cv2.imwrite('/{}'.format(os.path.basename(image_path)), image)
 
     show(image)
+
+    # Enhance the image
+    enhance_image(image_path)
 
 
 if __name__ == "__main__":
