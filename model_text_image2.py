@@ -44,10 +44,6 @@ def get_instance_segmentation_model(num_classes):
 
 
 def show(img, name="disp", width=1000):
-    """
-    name: name of window, should be name of img
-    img: source of img, should in type ndarray
-    """
     cv2.namedWindow(name, cv2.WINDOW_GUI_EXPANDED)
     cv2.resizeWindow(name, width, 1000)
     cv2.imshow(name, img)
@@ -114,7 +110,6 @@ def overlay_ann(image, mask, box, label, score, alpha=0.5):
 
     cv2.putText(
         image,
-        # "{}: {:.3f}".format(label, score),
         "{}".format(label),
         (box[0], box[1] + 10),
         cv2.FONT_HERSHEY_SIMPLEX,
@@ -232,6 +227,9 @@ def main():
         print("Document scanning failed. Proceeding with original image.")
         image = original_image
 
+    # Enhance the image
+    enhance_image("output.jpg")  # Enhance the scanned document
+
     rat = 1000 / image.shape[0]
     image = cv2.resize(image, None, fx=rat, fy=rat)
 
@@ -262,10 +260,6 @@ def main():
     cv2.imwrite('/{}'.format(os.path.basename(image_path)), image)
 
     show(image)
-
-    # Enhance the image
-    enhance_image(image_path)
-
 
 if __name__ == "__main__":
     main()
