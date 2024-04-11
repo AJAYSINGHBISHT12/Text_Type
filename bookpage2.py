@@ -15,20 +15,15 @@ def extract_text(image, lang):
     return text
 
 def read_text(text):
-    # Split the text into paragraphs and print each paragraph
-    paragraphs = text.split('\n\n')  # Split based on empty lines
-    paragraph_number = 1
-    for paragraph in paragraphs:
-        if paragraph.strip():  # Check if the paragraph is not empty
-            print(f"Paragraph {paragraph_number}: {paragraph}")
-            paragraph_number += 1
+    # Print the text without any modifications
+    print(text)
 
 def extract_and_read_text(image, lang):
     print(f"Extracting text for language: {lang}")
     text = extract_text(image, lang)
     print("Extracted text:")
     read_text(text)
-    print("\n")
+    # print("n")
 
 def main(image_path):
     # Load the image
@@ -60,5 +55,5 @@ def main(image_path):
         print("Language not supported.")
 
 if __name__ == "__main__":
-    image_path = "test.png"  # Provide the path to your book image
+    image_path = "output.jpg"  # Provide the path to your book image
     main(image_path)

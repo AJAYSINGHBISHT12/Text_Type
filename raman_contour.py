@@ -53,36 +53,36 @@ def scan_document(image):
     M = cv2.getPerspectiveTransform(rect_points, dst)
     warped = cv2.warpPerspective(image, M, (600, 600))
 
-    # Return the scanned document and contour points.
-    return warped, rect_points
+    # Return the scanned document.
+    return warped
 
 def enhance_image(image_path):
     # Read the image
     image = cv2.imread(image_path)
 
-    # Apply Gaussian blur to remove noise
-    blurred = cv2.GaussianBlur(image, (5, 5), 0)
-    
-    # Convert image to grayscale
-    gray = cv2.cvtColor(blurred, cv2.COLOR_BGR2GRAY)
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Apply adaptive thresholding to binarize the image
-    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
+    # Apply CLAHE (Contrast Limited Adaptive Histogram Equalization) to enhance contrast
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    equalized = clahe.apply(gray)
 
     # Display the original and enhanced images
-    cv2.imshow('Original Image', image)
-    cv2.imshow('Enhanced Image', thresh)
+    cv2.imshow('Original Image', gray)
+    cv2.imshow('Enhanced Image', equalized)
+    io.imsave("output2.jpg", equalized)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     image = io.imread("test3.jpg")
-    scanned_document, contour_points = scan_document(image)
+    scanned_document = scan_document(image)
     
+
     if scanned_document is not None:
         # Convert to uint8 for saving the image
         scanned_document = cv2.convertScaleAbs(scanned_document)
         io.imsave("output.jpg", scanned_document)
         
-        image_path = "test2.jpg"  # Change to the path of your image
+        image_path = "output.jpg"  # Change to the path of your image
         enhance_image(image_path)

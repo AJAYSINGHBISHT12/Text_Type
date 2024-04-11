@@ -140,7 +140,7 @@ def main():
     model.load_state_dict(checkpoint['model'])
     model.eval()
 
-    image_path = 'test8.jpg'
+    image_path = 'output2.jpg'
     print(image_path)
     assert os.path.exists(image_path)
 
