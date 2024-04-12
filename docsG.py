@@ -100,7 +100,7 @@ def scan_document(image):
     return warped
 
 if __name__ == "__main__":
-    img = cv.imread("test12.jpg")
+    img = cv.imread("test2.jpg")
 
     scanned_document = scan_document(img)
 
