@@ -111,7 +111,7 @@ def scan_document(image):
 # (show function, overlay_mask, overlay_ann, get_instance_segmentation_model, main)
 
 # Load the image
-img = cv2.imread("test2.jpg")
+img = cv2.imread("test14.jpg")
 
 # Run the first set of processes
 scanned_document = scan_document(img)
