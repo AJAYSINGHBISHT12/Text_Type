@@ -55,5 +55,5 @@ def main(image_path):
         print("Language not supported.")
 
 if __name__ == "__main__":
-    image_path = "output.jpg"  # Provide the path to your book image
+    image_path = "result.jpg"  # Provide the path to your book image
     main(image_path)
