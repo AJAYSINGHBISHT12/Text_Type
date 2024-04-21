@@ -111,7 +111,7 @@ def scan_document(image):
 # (show function, overlay_mask, overlay_ann, get_instance_segmentation_model, main)
 
 # Load the image
-img = cv2.imread("test8.jpg")
+img = cv2.imread("test6.jpg")
 
 # Run the first set of processes
 scanned_document = scan_document(img)
@@ -143,7 +143,7 @@ if scanned_document is not None:
     cv2.imwrite('output2.jpg', img)
     
     # Run the second set of processes
-    os.system("python model_text_image3.py")  # assuming second_code.py contains the second code snippet
+    os.system("python model_text_image4.py")  # assuming second_code.py contains the second code snippet
     
 else:
     print("No document contour found.")
