@@ -180,6 +180,7 @@ def main():
             
             # Extract text using OCR
             cropped_image = image[box[1]:box[3], box[0]:box[2]]
+            
             extracted_text = pytesseract.image_to_string(cropped_image)
             print("Extracted Text:", extracted_text)
 
