@@ -20,7 +20,7 @@ for i in range(len(class_list)):
     b = random.randint(0, 255)
     detection_colors.append((b, g, r))
 
-# Create EasyOCR reader for text recognition
+# Create EasyOCR reader for text recognitio
 reader = easyocr.Reader(['en'])
 
 # Vals to resize video frames
