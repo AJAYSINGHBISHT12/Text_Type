@@ -12,7 +12,7 @@ data = my_file.read()
 class_list = data.split("\n")
 my_file.close()
 
-# Generate random colors for class list
+# Generate random colors for class lis
 detection_colors = []
 for i in range(len(class_list)):
     r = random.randint(0, 255)
