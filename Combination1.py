@@ -12,7 +12,7 @@ data = my_file.read()
 class_list = data.split("\n")
 my_file.close()
 
-# Generate random colors for class lis
+# Generate random colors for class list
 detection_colors = []
 for i in range(len(class_list)):
     r = random.randint(0, 255)
@@ -20,7 +20,7 @@ for i in range(len(class_list)):
     b = random.randint(0, 255)
     detection_colors.append((b, g, r))
 
-# Create EasyOCR reader for text recognitio
+# Create EasyOCR reader for text recognition
 reader = easyocr.Reader(['en'])
 
 # Vals to resize video frames
