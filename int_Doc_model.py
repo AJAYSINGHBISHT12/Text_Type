@@ -143,7 +143,7 @@ if scanned_document is not None:
     cv2.imwrite('output2.jpg', img)
     
     # Run the second set of
-    os.system("python model_text_image4.py")  # assuming second_code.py contains the second code snippet
+    os.system("python model_text_image4.py")  # assuming second_code.py contains the second code 
     
 else:
     print("No document contour found.")
